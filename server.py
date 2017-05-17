@@ -27,9 +27,9 @@ def index():
             reqToken = request.args.get('token', '')
 
             if token != reqToken:
-                resp = make_response('Not allowed', 500)
-                resp.headers['Content-Type'] = 'text/plain'
-                return resp;
+                res = make_response('Forbidden', 403)
+                res.headers['Content-Type'] = 'text/plain'
+                return res;
 
         args = request.args.get('command', '').split(' ')
         command = [ 'certbot' ]
@@ -43,12 +43,14 @@ def index():
 
         output = json.dumps({ 'command': command, 'stdout': stdout, 'stderr': stderr }, indent=2)
 
-        resp = make_response(output)
-        resp.headers['Content-Type'] = 'application/json'
-        return resp
+        res = make_response(output)
+        res.headers['Content-Type'] = 'application/json'
+        return res
 
     except (CalledProcessError, OSError) as e:
-        return 'Error in certbot process: ' + str(e)
+        res = make_response('Error in certbot process: ' + str(e), 500)
+        res.headers['Content-Type'] = 'text/plain'
+        return res
 
 if __name__ == '__main__':
     if useSSL:
